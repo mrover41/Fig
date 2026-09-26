@@ -13,7 +13,7 @@ size_t data_arr_size = 0;
 ssize_t pattach(pid_t pid, process_data *data) {
 	long r;
 	if ((r = ptrace(PTRACE_ATTACH, pid, NULL, NULL)) < 0) {
-		fprintf(stderr, "Ptrace error, error code %i\n", r);
+		fprintf(stderr, "Ptrace error, error code %li\n", r);
 		return -1;
 	}
 
