@@ -13,9 +13,11 @@ int main(int argc, char *argv[]) { //TODO: Write loader
 
 	int pid = atoi(argv[1]);
 
-	/*int id = pattach(pid, data);
+	/*
+	ssize_t id;
+	if ((id = pattach(pid, data)) < 0) return -1;
 	// Load libs and other code
-	pdetach(id);*/
+	pdetach((size_t)id);*/
 
 	return 0;
 }
