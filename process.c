@@ -93,19 +93,19 @@ char *getName(pid_t pid) {
 
 	FILE *fp = fopen(buff, "r");
 	if (fp == NULL) {
-		fprintf(stderr, "Open file error: %s", buff);
+		fprintf(stderr, "Open file error: %s\n", buff);
 		return NULL;
 	}
 	
 	if (fgets(buff, BUFFER_SIZE, fp) != NULL) {
 #ifdef DEBUG
-		fprintf(stdout, "[PROCESS_C] Programm name readed: %s", buff);
+		fprintf(stdout, "[PROCESS_C] Programm name readed: %s\n", buff);
 #endif
 		fclose(fp);
 		return buff;
 	}
 
-	fprintf(stderr, "Read file error: %s", buff);
+	fprintf(stderr, "Read file error: %s\n", buff);
 	fclose(fp);
 	return NULL;
 }
