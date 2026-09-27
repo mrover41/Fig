@@ -19,7 +19,7 @@ To compile only modules use:
 make modules
 ```
 
-To compile one module use:
+To compile only one module use:
 ```bash
 make module_name
 ```
