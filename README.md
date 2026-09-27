@@ -1,6 +1,6 @@
 # About project
 
-It`s a "injector", or it also clled "hooker" on C
+It`s an "injector", or it also clled "hooker" on C
 
 # How to compile this
 
