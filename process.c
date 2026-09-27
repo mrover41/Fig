@@ -8,7 +8,8 @@
 process_data *data_arr = NULL;
 size_t data_arr_size = 0;
 
-//void *getBaseAddr(pid_t);
+//void *getBaseAddr(pid_t, const char *name);
+char *getName(pid_t);
 
 ssize_t pattach(pid_t pid, process_data *data) {
 	long r;
@@ -38,9 +39,11 @@ ssize_t pattach(pid_t pid, process_data *data) {
 		data_arr_size++;
 	}
 
+	char *name = getName(pid);
 	data_arr[data_arr_size - 1] = (process_data) {
 		.process_pid = pid,
-		//.base = getBaseAddr(pid); TODO: get base adress
+		//.base = getBaseAddr(pid, name); TODO: get base adress
+		.name = name,
 	};
 
 	data = data_arr + (data_arr_size - 1);
@@ -78,9 +81,31 @@ void pdetach(size_t id) {
 	return;
 }
 
-//	free(data_arr);
 
-
-void *getBaseAddr(pid_t pid) {
+void *getBaseAddr(pid_t pid, const char *name) {
 	//string maps_path = "/proc/" + to_string(pid) + "/maps";
+}
+
+char *getName(pid_t pid) {
+	char buff[BUFFER_SIZE];
+
+	sprintf(buff, "/proc/%d/comm", pid);
+
+	FILE *fp = fopen(buff, "r");
+	if (fp == NULL) {
+		fprintf(stderr, "Open file error: %s", buff);
+		return NULL;
+	}
+	
+	if (fgets(buff, BUFFER_SIZE, fp) != NULL) {
+#ifdef DEBUG
+		fprintf(stdout, "[PROCESS_C] Programm name readed: %s", buff);
+#endif
+		fclose(fp);
+		return buff;
+	}
+
+	fprintf(stderr, "Read file error: %s", buff);
+	fclose(fp);
+	return NULL;
 }

@@ -24,3 +24,8 @@ To compile one module use:
 make module_name
 ```
 
+If u want compile debug version, use flag `DEBUG=1`<br>
+For example:
+```bash
+make main DEBUG=1
+```

@@ -1,5 +1,9 @@
 CC = gcc
-CFLAGS += -Wall -Wextra -O2 -I/usr/local/include
+ifeq ($(DEBUG), 1)
+	CFLAGS += -Wall -Wextra -O2 -g -I/usr/local/include -DDEBUG
+else
+	CFLAGS += -Wall -Wextra -O2 -I/usr/local/include
+endif
 
 MAIN_LDFLAGS = -L/usr/local/lib -ldiscord -ldl -lpthread -lcurl -lssl -lcrypto -rdynamic
 

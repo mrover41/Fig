@@ -3,9 +3,12 @@
 
 #include <sys/types.h>
 
+#define BUFFER_SIZE 255
+
 typedef struct {
 	pid_t process_pid;
-	void *base;
+	const char *name;
+	const void *base;
 } process_data;
 
 ssize_t pattach(pid_t, process_data *);
