@@ -5,7 +5,7 @@ else
 	CFLAGS += -Wall -Wextra -O2 -I/usr/local/include
 endif
 
-MAIN_LDFLAGS = -L/usr/local/lib -ldiscord -ldl -lpthread -lcurl -lssl -lcrypto -rdynamic
+MAIN_LDFLAGS = -L/usr/local/lib -ldl -lpthread -lcurl -lssl -lcrypto -rdynamic
 
 MOD_LDFLAGS = -ldl -rdynamic
 
