@@ -1,4 +1,5 @@
 CC = gcc
+
 ifeq ($(DEBUG), 1)
 	CFLAGS += -Wall -Wextra -O2 -g -I/usr/local/include -DDEBUG
 else
@@ -6,7 +7,6 @@ else
 endif
 
 MAIN_LDFLAGS = -L/usr/local/lib -ldl -lpthread -lcurl -lssl -lcrypto -rdynamic
-
 MOD_LDFLAGS = -ldl -rdynamic
 
 BIN_NAME ?= loader.bin
@@ -19,6 +19,10 @@ MODULE_DIRS ?= \
 
 CLEAN_MOD_DIRS = $(patsubst %/,%,$(MODULE_DIRS))
 DEFAULT_MOD_TARGETS = $(patsubst %, $(MOD_DIR)/%.so, $(notdir $(CLEAN_MOD_DIRS)))
+
+H_INCLUDES ?= \
+	process.h \
+	inject.h \
 
 all: $(BIN_NAME) $(DEFAULT_MOD_TARGETS)
 
@@ -33,7 +37,9 @@ $(BIN_NAME): $(APP_SRCS)
 
 $(MOD_DIR)/%.so: ./mod_dev/%
 	@mkdir -p $(MOD_DIR)
-	cd $< && ln -sf ../../*.h ./ 2>/dev/null || true
+	@for header in $(H_INCLUDES); do \
+		ln -sf ../../$$header $</ 2>/dev/null || true; \
+	done
 	$(CC) $(CFLAGS) -shared -fPIC $(wildcard $</*.c) -o $@ $(MOD_LDFLAGS)
 
 clean:

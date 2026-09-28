@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 #include "process.h"
+#include "processinf.h"
 #include "inject.h"
 
 bool pallocate_mem(void *addr, process_data *data) {

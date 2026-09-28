@@ -5,6 +5,7 @@
 #include <stddef.h>
 
 #include "process.h"
+#include "processinf.h"
 
 process_info *data_arr = NULL;
 size_t data_arr_size = 0;
