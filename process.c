@@ -42,7 +42,7 @@ ssize_t pattach(pid_t pid, process_data *data) {
 	char *name = getName(pid);
 	data_arr[data_arr_size - 1] = (process_data) {
 		.process_pid = pid,
-		//.base = getBaseAddr(pid, name); TODO: get base adress
+		//.base = getBaseAddr(pid, name) TODO: get base adress
 		.name = name,
 	};
 
