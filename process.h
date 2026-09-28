@@ -7,7 +7,6 @@
 
 typedef struct {
 	pid_t pid;
-	const char *name;
 	const void *base;
 } process_data;
 
