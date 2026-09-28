@@ -2,16 +2,9 @@
 #include <sys/ptrace.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <sys/user.h>
 #include <stddef.h>
 
 #include "process.h"
-
-typedef struct {
-	process_data pdata;
-	char name[BUFFER_SIZE];
-	void *allocAddr;
-} process_info;
 
 process_info *data_arr = NULL;
 size_t data_arr_size = 0;
@@ -116,54 +109,6 @@ bool pplay(process_data *data) {
 	return true;
 }
 
-bool pallocate_mem(void *addr, process_data *data) {
-	size_t index;
-	if ((index = getIndex(data)) < 0) {
-		fputs("get index error\n", stderr);
-		return false;
-	}
-
-	ppause(data);
-
-	struct user_regs_struct old_regs, regs;
-	ptrace(PTRACE_GETREGS, data->pid, NULL, &regs);
-
-	old_regs = regs;
-
-	regs.rax = 0x09;
-	regs.rdi = 0;
-	regs.rsi = 4096;
-	regs.rdx = 0x1 | 0x2 | 0x4;
-	regs.r10 = 0x02 | 0x20;
-	regs.r8  = (unsigned long long)-1;
-	regs.r9  = 0;
-
-	regs.orig_rax = -1; //Kernel can save RAX before interrupt syscall, we must reset this
-
-	ptrace(PTRACE_SETREGS, data->pid, NULL, &regs);
-	ptrace(PTRACE_SINGLESTEP, data->pid, NULL, NULL);
-
-	ptrace(PTRACE_GETREGS, data->pid, NULL, &regs);
-	data_arr[index].allocAddr = (void *)regs.rax;
-
-	ptrace(PTRACE_SETREGS, data->pid, NULL, &old_regs);
-
-	return true;
-}
-
-bool pexecute(void (*method)(), process_data *data) {
-	size_t index;
-	if ((index = getIndex(data)) < 0) {
-		fputs("get index error\n", stderr);
-		return false;
-	}
-
-	if (data_arr[index].allocAddr == NULL) return false;
-	
-	//TODO: Inject code
-
-	return true;
-}
 
 void *getBaseAddr(pid_t pid, const char *name) {
 	//string maps_path = "/proc/" + to_string(pid) + "/maps";
@@ -192,8 +137,12 @@ void getName(pid_t pid, void *buff) {
 	return;
 }
 
+process_info *get_pparrent(process_data *data) {
+	return (process_info*)((char*)data - offsetof(process_info, pdata));
+}
+
 ssize_t getIndex(process_data *data) {
-	process_info *parent = (process_info*)((char*)data - offsetof(process_info, pdata));
+	process_info *parent = get_pparrent(data);
 	size_t index = (parent - data_arr);
 
 	if (index >= data_arr_size) {
