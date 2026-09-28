@@ -7,6 +7,6 @@ typedef struct {
 	void *allocAddr;
 } process_info;
 
-process_info *get_pparrent(process_data *data);
+process_info *get_pparent(process_data *data);
 
 #endif
