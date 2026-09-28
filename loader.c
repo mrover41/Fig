@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/types.h>
 
 #include "process.h"
 
@@ -11,13 +12,14 @@ int main(int argc, char *argv[]) { //TODO: Write loader
 		return 0;
 	}
 
-	int pid = atoi(argv[1]);
+	pid_t pid = 0;
+	if ((pid = atoi(argv[1])) == 0) return -1;
 
-	/*
 	ssize_t id;
 	if ((id = pattach(pid, data)) < 0) return -1;
-	// Load libs and other code
-	pdetach((size_t)id);*/
+	
+	//TODO: Load libs	
 
+	pdetach_all();
 	return 0;
 }
