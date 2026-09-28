@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/user.h>
+#include <stddef.h>
 
 #include "process.h"
 
@@ -17,11 +18,13 @@ size_t data_arr_size = 0;
 //void *getBaseAddr(pid_t, const char *name);
 char *getName(pid_t);
 
-ssize_t pattach(pid_t pid, process_data *data) {
+ssize_t getIndex(process_data *data);
+
+process_data *pattach(pid_t pid) {
 	long r;
 	if ((r = ptrace(PTRACE_ATTACH, pid, NULL, NULL)) < 0) {
 		fprintf(stderr, "Ptrace error, error code %li\n", r);
-		return -1;
+		return NULL;
 	}
 
 	if (data_arr == NULL) {
@@ -29,7 +32,7 @@ ssize_t pattach(pid_t pid, process_data *data) {
 			fputs("Memory allocation error\n", stderr);
 
 			ptrace(PTRACE_DETACH, pid);
-			return -1;
+			return NULL;
 		}
 		data_arr_size++;
 	} else {
@@ -38,7 +41,7 @@ ssize_t pattach(pid_t pid, process_data *data) {
 			fputs("Memory allocation error\n", stderr);
 
 			ptrace(PTRACE_DETACH, pid);
-			return -1;
+			return NULL;
 		};
 
 		data_arr = arr_cpy;
@@ -56,20 +59,19 @@ ssize_t pattach(pid_t pid, process_data *data) {
 		.allocAddr = NULL,
 	};
 
-	data = &data_arr[data_arr_size - 1].pdata;
-
-	return data_arr_size - 1;
+	return &data_arr[data_arr_size - 1].pdata;
 }
 
-void pdetach(size_t id) {
-#ifdef DEBUG
-	if (id >= data_arr_size) {
-		fputs("[PROCESS_H] out of range error\n", stderr);
+void pdetach(process_data *data) {
+	if (data == NULL) return;
+
+	size_t index;
+	if ((index = getIndex(data)) < 0) {
+		fputs("get index error\n", stderr);
 		return;
 	}
-#endif
 
-	for (size_t current = id; current < data_arr_size - 1; current++) { //-1 something we could use current + 1
+	for (size_t current = index; current < data_arr_size - 1; current++) { //-1 something we could use current + 1
 		data_arr[current] = data_arr[current + 1];
 	}
 
@@ -100,36 +102,32 @@ void pdetach_all() {
 	free(data_arr);
 }
 
-bool ppause(size_t id) {
-	if (id >= data_arr_size) {
-		fputs("[PROCESS_H] out of range error\n", stderr);
-		return false;
-	}
-	ptrace(PTRACE_INTERRUPT, data_arr[id].pdata.pid, NULL, NULL);
+bool ppause(process_data *data) {
+	if (data == NULL) return false;
+
+	ptrace(PTRACE_INTERRUPT, data->pid, NULL, NULL);
 
 	return true;
 }
 
-bool pplay(size_t id) {
-	if (id >= data_arr_size) {
-		fputs("[PROCESS_H] out of range error\n", stderr);
-		return false;
-	}
-	ptrace(PTRACE_CONT, data_arr[id].pdata.pid, NULL, NULL);
+bool pplay(process_data *data) {
+	if (data == NULL) return false;
+	ptrace(PTRACE_CONT, data->pid, NULL, NULL);
 
 	return true;
 }
 
-bool pallocate_mem(void *addr, size_t id) {
-	if (id >= data_arr_size) {
-		fputs("[PROCESS_H] out of range error\n", stderr);
+bool pallocate_mem(void *addr, process_data *data) {
+	size_t index;
+	if ((index = getIndex(data)) < 0) {
+		fputs("get index error\n", stderr);
 		return false;
 	}
 
-	ppause(id);
+	ppause(data);
 
 	struct user_regs_struct old_regs, regs;
-	ptrace(PTRACE_GETREGS, data_arr[id].pdata.pid, NULL, &regs);
+	ptrace(PTRACE_GETREGS, data->pid, NULL, &regs);
 
 	old_regs = regs;
 
@@ -143,24 +141,25 @@ bool pallocate_mem(void *addr, size_t id) {
 
 	regs.orig_rax = -1; //Kernel can save RAX before interrupt syscall, we must reset this
 
-	ptrace(PTRACE_SETREGS, data_arr[id].pdata.pid, NULL, &regs);
-	ptrace(PTRACE_SINGLESTEP, data_arr[id].pdata.pid, NULL, NULL);
+	ptrace(PTRACE_SETREGS, data->pid, NULL, &regs);
+	ptrace(PTRACE_SINGLESTEP, data->pid, NULL, NULL);
 
-	ptrace(PTRACE_GETREGS, data_arr[id].pdata.pid, NULL, &regs);
-	data_arr[id].allocAddr = (void *)regs.rax;
+	ptrace(PTRACE_GETREGS, data->pid, NULL, &regs);
+	data_arr[index].allocAddr = (void *)regs.rax;
 
-	ptrace(PTRACE_SETREGS, data_arr[id].pdata.pid, NULL, &old_regs);
+	ptrace(PTRACE_SETREGS, data->pid, NULL, &old_regs);
 
 	return true;
 }
 
-bool pexecute(void (*method)(), size_t id) {
-	if (id >= data_arr_size) {
-		fputs("[PROCESS_H] out of range error\n", stderr);
-		return false;
-	} else if (data_arr[id].allocAddr == NULL) {
+bool pexecute(void (*method)(), process_data *data) {
+	size_t index;
+	if ((index = getIndex(data)) < 0) {
+		fputs("get index error\n", stderr);
 		return false;
 	}
+
+	if (data_arr[index].allocAddr == NULL) return false;
 	
 	//TODO: Inject code
 
@@ -193,4 +192,16 @@ char *getName(pid_t pid) {
 	fprintf(stderr, "Read file error: %s\n", buff);
 	fclose(fp);
 	return NULL;
+}
+
+ssize_t getIndex(process_data *data) {
+	process_info *parent = (process_info*)((char*)data - offsetof(process_info, pdata));
+	size_t index = (parent - data_arr);
+
+	if (index >= data_arr_size) {
+		fputs("out of range, memory leak\n", stderr);
+		return -1;
+	}
+
+	return index;
 }
