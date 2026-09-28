@@ -95,7 +95,6 @@ void pdetach(process_data *data) {
 void pdetach_all() {
 	for (size_t cur = 0; cur < data_arr_size; cur++) {
 		ptrace(PTRACE_DETACH, data_arr[cur].pdata.pid, NULL, NULL);
-		free(data_arr[cur].name);
 	}
 
 	data_arr_size = 0;
