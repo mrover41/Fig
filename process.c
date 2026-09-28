@@ -9,6 +9,7 @@
 
 typedef struct {
 	process_data pdata;
+	char name[BUFFER_SIZE];
 	void *allocAddr;
 } process_info;
 
@@ -16,7 +17,7 @@ process_info *data_arr = NULL;
 size_t data_arr_size = 0;
 
 //void *getBaseAddr(pid_t, const char *name);
-char *getName(pid_t);
+void getName(pid_t, void *);
 
 ssize_t getIndex(process_data *data);
 
@@ -37,7 +38,7 @@ process_data *pattach(pid_t pid) {
 		data_arr_size++;
 	} else {
 		process_info *arr_cpy = data_arr;
-		if ((arr_cpy = realloc(arr_cpy, sizeof(process_info) * data_arr_size + 1)) == NULL) {
+		if ((arr_cpy = realloc(arr_cpy, sizeof(process_info) * (data_arr_size + 1))) == NULL) {
 			fputs("Memory allocation error\n", stderr);
 
 			ptrace(PTRACE_DETACH, pid);
@@ -48,21 +49,14 @@ process_data *pattach(pid_t pid) {
 		data_arr_size++;
 	}
 
-	char *name = getName(pid);
-	data_arr[data_arr_size - 1] = (process_data) {
-		.process_pid = pid,
-		//.base = getBaseAddr(pid, name) TODO: get base adress
-		.name = name,
-	};
-
 	data_arr[data_arr_size - 1] = (process_info) {
 		.pdata = (process_data) {
 			.pid = pid,
 			//.base = getBaseAddr(pid, name), TODO: get base adress
-			.name = name,
 		},
 		.allocAddr = NULL,
 	};
+	getName(pid, &data_arr[data_arr_size - 1].name);
 
 	return &data_arr[data_arr_size - 1].pdata;
 }
@@ -101,6 +95,7 @@ void pdetach(process_data *data) {
 void pdetach_all() {
 	for (size_t cur = 0; cur < data_arr_size; cur++) {
 		ptrace(PTRACE_DETACH, data_arr[cur].pdata.pid, NULL, NULL);
+		free(data_arr[cur].name);
 	}
 
 	data_arr_size = 0;
@@ -175,28 +170,27 @@ void *getBaseAddr(pid_t pid, const char *name) {
 	//string maps_path = "/proc/" + to_string(pid) + "/maps";
 }
 
-char *getName(pid_t pid) {
-	char buff[BUFFER_SIZE];
-
+void getName(pid_t pid, void *buff) {
 	sprintf(buff, "/proc/%d/comm", pid);
 
 	FILE *fp = fopen(buff, "r");
 	if (fp == NULL) {
-		fprintf(stderr, "Open file error: %s\n", buff);
-		return NULL;
+		fprintf(stderr, "Open file error: %s\n", (char *)buff);
+		return;
 	}
 	
 	if (fgets(buff, BUFFER_SIZE, fp) != NULL) {
 #ifdef DEBUG
-		fprintf(stdout, "[PROCESS_C] Programm name readed: %s\n", buff);
+		fprintf(stdout, "[PROCESS_C] Programm name readed: %s\n", (char *)buff);
 #endif
 		fclose(fp);
-		return buff;
+		return;
 	}
 
-	fprintf(stderr, "Read file error: %s\n", buff);
+	fprintf(stderr, "Read file error: %s\n", (char *)buff);
 	fclose(fp);
-	return NULL;
+	buff = NULL;
+	return;
 }
 
 ssize_t getIndex(process_data *data) {
