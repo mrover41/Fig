@@ -49,6 +49,11 @@ process_data *pattach(pid_t pid) {
 	}
 
 	char *name = getName(pid);
+	data_arr[data_arr_size - 1] = (process_data) {
+		.process_pid = pid,
+		//.base = getBaseAddr(pid, name) TODO: get base adress
+		.name = name,
+	};
 
 	data_arr[data_arr_size - 1] = (process_info) {
 		.pdata = (process_data) {
