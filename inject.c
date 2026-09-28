@@ -10,7 +10,7 @@ bool pallocate_mem(void *addr, process_data *data) {
 	ppause(data);
 
 	process_info *pinf = NULL;
-	if ((pinf = get_pparrent(data)) == NULL) return false;
+	if ((pinf = get_pparent(data)) == NULL) return false;
 
 	struct user_regs_struct old_regs, regs;
 	ptrace(PTRACE_GETREGS, data->pid, NULL, &regs);
@@ -40,7 +40,7 @@ bool pallocate_mem(void *addr, process_data *data) {
 
 bool pexecute(void (*method)(), process_data *data) {
 	process_info *pinf = NULL;
-	if ((pinf = get_pparrent(data)) == NULL) return false;
+	if ((pinf = get_pparent(data)) == NULL) return false;
 
 	if (pinf->allocAddr == NULL) return false;
 	

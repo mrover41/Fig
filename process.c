@@ -138,12 +138,12 @@ void getName(pid_t pid, void *buff) {
 	return;
 }
 
-process_info *get_pparrent(process_data *data) {
+process_info *get_pparent(process_data *data) {
 	return (process_info*)((char*)data - offsetof(process_info, pdata));
 }
 
 ssize_t getIndex(process_data *data) {
-	process_info *parent = get_pparrent(data);
+	process_info *parent = get_pparent(data);
 	size_t index = (parent - data_arr);
 
 	if (index >= data_arr_size) {
