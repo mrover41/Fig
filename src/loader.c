@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 
-#include "process.h"
+#include <api/process.h>
 
 static process_data *data;
 

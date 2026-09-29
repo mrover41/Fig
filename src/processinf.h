@@ -1,6 +1,10 @@
 #ifndef PROCESSI_H
 #define PROCESSI_H
 
+#include <types/pdata.h>
+
+#define BUFFER_SIZE 255
+
 typedef struct {
 	process_data pdata;
 	char name[BUFFER_SIZE];

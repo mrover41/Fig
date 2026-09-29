@@ -4,7 +4,9 @@
 #include <stdio.h>
 #include <stddef.h>
 
-#include "process.h"
+#include <types/pdata.h>
+#include <api/process.h>
+
 #include "processinf.h"
 
 process_info *data_arr = NULL;
