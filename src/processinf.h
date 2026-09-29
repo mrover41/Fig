@@ -7,8 +7,8 @@
 
 typedef struct {
 	process_data pdata;
-	char name[BUFFER_SIZE];
 	void *allocAddr;
+	char name[BUFFER_SIZE];
 } process_info;
 
 process_info *get_pparent(process_data *data);
