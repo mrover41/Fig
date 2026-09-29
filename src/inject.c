@@ -1,10 +1,13 @@
 #include <sys/ptrace.h>
+#include <sys/types.h>
 #include <sys/user.h>
 #include <stdio.h>
 
-#include "process.h"
+#include <api/inject.h>
+#include <api/process.h>
+#include <types/pdata.h>
+
 #include "processinf.h"
-#include "inject.h"
 
 bool pallocate_mem(void *addr, process_data *data) {
 	ppause(data);

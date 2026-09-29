@@ -2,13 +2,7 @@
 #define PROCESS_H
 
 #include <sys/types.h>
-
-#define BUFFER_SIZE 255
-
-typedef struct {
-	pid_t pid;
-	const void *base;
-} process_data;
+#include <types/pdata.h>
 
 process_data *pattach(pid_t);
 void pdetach(process_data *);
