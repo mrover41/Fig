@@ -20,6 +20,7 @@ bool pallocate_mem(void *addr, process_data *data) {
 
 	old_regs = regs;
 
+	regs.rip = addr;
 	regs.rax = 0x09;
 	regs.rdi = 0;
 	regs.rsi = 4096;
