@@ -60,7 +60,7 @@ process_data *pattach(pid_t pid) {
 void pdetach(process_data *data) {
 	if (data == NULL) return;
 
-	size_t index;
+	ssize_t index;
 	if ((index = getIndex(data)) < 0) {
 		fputs("get index error\n", stderr);
 		return;
@@ -115,6 +115,8 @@ bool pplay(process_data *data) {
 
 void *getBaseAddr(pid_t pid, const char *name) {
 	//string maps_path = "/proc/" + to_string(pid) + "/maps";
+	
+	return NULL;
 }
 
 void getName(pid_t pid, void *buff) {

@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) { //TODO: Write loader
 	pid_t pid = 0;
 	if ((pid = atoi(argv[1])) == 0) return -1;
 
-	if ((data = pattach(pid)) < 0) return -1;
+	if ((data = pattach(pid)) != NULL) return -1;
 	
 	//TODO: Load libs	
 

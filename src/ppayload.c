@@ -1,7 +1,7 @@
 #include <sys/ptrace.h>
 #include <sys/types.h>
 #include <sys/user.h>
-#include <sys/types>
+#include <sys/types.h>
 #include <stdio.h>
 
 #include <api/ppayload.h>
@@ -16,8 +16,8 @@ bool palloc(process_data *data) {
 	void *addr = NULL;
 
 	char opcode[] = {0x0F, 0x05}; //syscall
-	if ((addr = pfind(&opcode, sizeof(opcode) / sizeof(opcode[0]))) == NULL) {
-		putsf("[PAYLOAD_H] find syscall instruction error", stderr);
+	if ((addr = pfind(opcode, sizeof(opcode) / sizeof(opcode[0]))) == NULL) {
+		fputs("[PAYLOAD_H] find syscall instruction error", stderr);
 		return false;
 	}
 
@@ -35,7 +35,7 @@ bool palloc(process_data *data) {
 
 	old_regs = regs;
 
-	regs.rip = addr;
+	regs.rip = (long long unsigned int)addr;
 	regs.rax = 0x09;
 	regs.rdi = 0;
 	regs.rsi = 4096;
