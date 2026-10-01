@@ -34,7 +34,7 @@ $(BUILD_DIR) $(MOD_DIR):
 
 $(BIN_NAME): $(APP_SRCS)
 	@mkdir -p $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(APP_SRCS) -o $(BUILD_DIR)/$@ -L/usr/local/lib -Wl,--whole-archive -ldiscord -Wl,--no-whole-archive -ldl -lpthread -lcurl -lssl -lcrypto -rdynamic
+	$(CC) $(CFLAGS) $(APP_SRCS) -o $(BUILD_DIR)/$@ -L/usr/local/lib -Wl,--whole-archive -ldiscord -Wl,--no-whole-archive -ldl -lpthread -lcurl -lssl -lcrypto -rdynamic -lm
 
 $(MOD_DIR)/%.so: ./src/mod_dev/%
 	@mkdir -p $(MOD_DIR)
