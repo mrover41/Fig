@@ -1,7 +1,7 @@
 CC = gcc
 
 ifeq ($(DEBUG), 1)
-	CFLAGS += -g -DDEBUG
+	CFLAGS += -g -DDEBUG -fsanitize=address -fsanitize=leak
 endif
 
 CFLAGS += -Wall -Wextra -O2 -I/usr/local/include -I./include -I./comm
