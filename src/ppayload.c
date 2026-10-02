@@ -1,7 +1,13 @@
+#define _GNU_SOURCE
+
 #include <sys/ptrace.h>
 #include <sys/types.h>
-#include <sys/user.h>
 #include <sys/types.h>
+#include <sys/user.h>
+#include <sys/uio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 #include <stdio.h>
 
 #include <api/ppayload.h>
@@ -10,19 +16,24 @@
 
 #include "processinf.h"
 
-void *pfind(char *, size_t);
+
+void *pfind(const char *, size_t, process_data *);
 
 bool palloc(process_data *data) {
 	void *addr = NULL;
 
+#ifdef DEBUG
+	puts("Try to alloc memory in target process\n");
+#endif
+
 	char opcode[] = {0x0F, 0x05}; //syscall
-	if ((addr = pfind(opcode, sizeof(opcode) / sizeof(opcode[0]))) == NULL) {
-		fputs("[PAYLOAD_H] find syscall instruction error", stderr);
+	if ((addr = pfind(opcode, sizeof(opcode) / sizeof(opcode[0]), data)) == NULL) { //TODO: Убрать это нахуй ибо оно не работает
+		fputs("[PAYLOAD_H] find syscall instruction error\n", stderr);
 		return false;
 	}
 
 #ifdef DEBUG
-	fprintf(stderr, "syacall instruction found: %p", addr);
+	fprintf(stderr, "syacall instruction found: %p\n", addr);
 #endif
 
 	ppause(data);
@@ -68,8 +79,45 @@ bool pexecute(void (*method)(), process_data *data) {
 	return true;
 }
 
-void *pfind(char *buff, size_t buff_size) {
-	//TODO: find bytecode instruction
+void *pfind(const char *buff, size_t buff_size, process_data *dat) { //TODO: find bytecode instruction
+	size_t bsize = dat->base_end - dat->base;
+	char *membuff = malloc(bsize);
+
+#ifdef DEBUG
+	fprintf(stdout, "Try to find instruction, memory buffer size: %li\nBuffer size: %li\n\n", bsize, buff_size);
+#endif
+
+	struct iovec local_iov[1];
+	local_iov[0].iov_base = membuff;
+	local_iov[0].iov_len = bsize;
+
+	struct iovec remote_iov[1];
+	remote_iov[0].iov_base = dat->base;
+	remote_iov[0].iov_len = bsize;
+
+	ssize_t nread = process_vm_readv(dat->pid, local_iov, 1, remote_iov, 1, 0);
+
+	size_t res = 0;
 	
-	return NULL;
+	if (bsize < buff_size) {
+		free(membuff);
+		fputs("[PFIND] Err: bsize >= buff_size", stderr);
+		return NULL;
+	}
+
+	void *found_addr = NULL;
+
+    for (size_t i = 0; i <= bsize - buff_size; i++) {
+        if (memcmp(membuff + i, buff, buff_size) == 0) {
+            found_addr = (void *)(dat->base + i);
+            break;
+        }
+    }
+	
+#ifdef DEBUG
+	fprintf(stdout, "Instruction found, adress: %li\n", res);
+#endif
+
+	free(membuff);
+	return (void *)res;
 }

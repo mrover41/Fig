@@ -3,20 +3,16 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stddef.h>
-#include <alloca.h>
 #include <stdio.h>
-#include <math.h>
 
 #include <types/pdata.h>
 #include <api/process.h>
+#include <api/procinf.h>
 
 #include "processinf.h"
 
 process_info *data_arr = NULL;
 size_t data_arr_size = 0;
-
-void *getBaseAddr(pid_t, const char *);
-void getName(pid_t, void *);
 
 ssize_t getIndex(process_data *data);
 
@@ -51,10 +47,18 @@ process_data *pattach(pid_t pid) {
 	char name[BUFFER_SIZE];
 	getName(pid, name);
 
+	size_t bAddr = 0;
+	size_t bAddre = 0;
+	if (!getBaseAddr(pid, name, &bAddr, &bAddre)) {
+		fprintf(stderr, "Get base adress error, pid: %i, name: %s, base: %li, base end: %li\n", pid, name, bAddr, bAddre);
+		return NULL;
+	};
+
 	data_arr[data_arr_size - 1] = (process_info) {
 		.pdata = (process_data) {
 			.pid = pid,
-			.base = getBaseAddr(pid, name),
+			.base = (void *)bAddr,
+			.base_end = (void *)bAddre,
 		},
 		.allocAddr = NULL,
 	};
@@ -96,6 +100,7 @@ void pdetach(process_data *data) {
 
 void pdetach_all() {
 	for (size_t cur = 0; cur < data_arr_size; cur++) {
+		pplay(&data_arr[cur].pdata);
 		ptrace(PTRACE_DETACH, data_arr[cur].pdata.pid, NULL, NULL);
 	}
 
@@ -116,79 +121,6 @@ bool pplay(process_data *data) {
 	ptrace(PTRACE_CONT, data->pid, NULL, NULL);
 
 	return true;
-}
-
-
-void *getBaseAddr(pid_t pid, const char *name) {
-	char *maps_path;
-
-	size_t length = (pid > 0 ? log10(pid) + 1 : 1);
-	maps_path = alloca(length + 12);
-
-	sprintf(maps_path, "/proc/%i/maps", pid);
-#ifdef DEBUG
-	fprintf(stdout, "maps path: %s\n", maps_path);
-	fprintf(stdout, "maps str length: %li + 12 = %li\n", length, length + 12);
-#endif
-
-	FILE *fp = fopen(maps_path, "r");
-	if (fp == NULL) {
-		fprintf(stderr, "Open file error: %s\n", maps_path);
-		return NULL;
-	}
-
-	char *line = NULL;
-	size_t len = 0;
-	while(getdelim(&line, &len, '\n', fp) != -1) {
-		char *n;
-		if((n = strrchr(line, '/')) == NULL) continue;
-		n += 1;
-		if (strcmp(n, name) == 0) break;
-#ifdef DEBUG
-		fprintf(stdout, "Str not have '/': line: %s, n: %s\n", line, n);
-#endif
-	}
-	
-	char *addrs = NULL;
-	if ((addrs = strchr(line, '-')) == NULL) {
-		free(line);
-		fclose(fp);
-		return NULL;
-	}
-
-	*addrs = '\0';
-	size_t res = strtoul(line, NULL, 16);
-
-#ifdef DEBUG
-	fprintf(stdout, "Base addr found, base adress: \n%li\nstring:\n%s\n", res, line);
-#endif
-
-	free(line);
-	fclose(fp);
-	return (void *)res;
-}
-
-void getName(pid_t pid, void *buff) {
-	sprintf(buff, "/proc/%d/comm", pid);
-
-	FILE *fp = fopen(buff, "r");
-	if (fp == NULL) {
-		fprintf(stderr, "Open file error: %s\n", (char *)buff);
-		return;
-	}
-	
-	if (fgets(buff, BUFFER_SIZE, fp) != NULL) {
-#ifdef DEBUG
-		fprintf(stdout, "[PROCESS_C] Programm name readed: %s\n", (char *)buff);
-#endif
-		fclose(fp);
-		return;
-	}
-
-	fprintf(stderr, "Read file error: %s\n", (char *)buff);
-	fclose(fp);
-	buff = NULL;
-	return;
 }
 
 process_info *get_pparent(process_data *data) {
