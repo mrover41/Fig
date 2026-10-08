@@ -29,3 +29,9 @@ For example:
 ```bash
 make main DEBUG=1
 ```
+
+If u want run unit tests, you can use flag `UTESTS=...`<br>
+For example:
+```bash
+make main DEBUG=1 UTESTS=malloc,and,other,methods
+```
