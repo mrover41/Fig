@@ -4,13 +4,22 @@ ifeq ($(DEBUG), 1)
 	CFLAGS += -g -DDEBUG -fsanitize=address -fsanitize=leak
 endif
 
+UTESTS ?=
+comma := ,
+WRAP_FLAGS = $(foreach t,$(subst $(comma), ,$(UTESTS)),-Wl,--wrap,$(t))
+
 CFLAGS += -Wall -Wextra -O2 -I/usr/local/include -I./include -I./comm
 
 MAIN_LDFLAGS = -L/usr/local/lib -ldl -lpthread -lcurl -lssl -lcrypto -rdynamic
 MOD_LDFLAGS = -ldl -rdynamic
 
 BIN_NAME ?= loader.bin
-APP_SRCS = $(wildcard src/*.c)
+APP_SRCS += $(wildcard src/main/*.c)
+APP_SRCS += $(wildcard src/uflags/*.c)
+
+ifneq ($(UTESTS),)
+APP_SRCS += $(wildcard src/utests/*.c)
+endif
 
 BUILD_DIR = builds
 MOD_DIR = $(BUILD_DIR)/modules
@@ -34,7 +43,7 @@ $(BUILD_DIR) $(MOD_DIR):
 
 $(BIN_NAME): $(APP_SRCS)
 	@mkdir -p $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(APP_SRCS) -o $(BUILD_DIR)/$@ -L/usr/local/lib -Wl,--whole-archive -ldiscord -Wl,--no-whole-archive -ldl -lpthread -lcurl -lssl -lcrypto -rdynamic -lm
+	$(CC) $(CFLAGS) $(APP_SRCS) $(WRAP_FLAGS) -o $(BUILD_DIR)/$@ -L/usr/local/lib -Wl,--whole-archive -ldiscord -Wl,--no-whole-archive -ldl -lpthread -lcurl -lssl -lcrypto -rdynamic -lm
 
 $(MOD_DIR)/%.so: ./src/mod_dev/%
 	@mkdir -p $(MOD_DIR)
