@@ -6,7 +6,7 @@
 #include <utest/pattach_t.h>
 #include <api/process.h>
 
-static process_data *data;
+//static process_data *data;
 
 int main(int argc, char *argv[]) { //TODO: Write loader
 	if (argc < 2) {
@@ -22,8 +22,8 @@ int main(int argc, char *argv[]) { //TODO: Write loader
 
 	puts("\t[-] TESTS BEGIN [-]\n");
 
-	if (pattach_t(pid, &data)) puts("\tTEST: Pattach_t done\n");
-	if (pattach_malloc_t(pid, &data)) puts("\tTEST: Pattach_malloc_t done\n"); //TODO: fix logging in this test
+	if (pattach_t(pid)) puts("\tTEST: Pattach_t done\n");
+	if (pattach_malloc_t(pid)) puts("\tTEST: Pattach_malloc_t done\n"); //TODO: fix logging in this test
 
 	puts("\t[-] TESTS END [-]\n");
 

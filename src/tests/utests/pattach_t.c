@@ -6,14 +6,14 @@
 #include <types/pdata.h>
 #include <api/process.h>
 
-bool pattach_t(pid_t pid, process_data **data) {
-	*data = pattach(pid);
+bool pattach_t(pid_t pid) {
+	process_data *data = pattach(pid);
 	return data != NULL;
 }
 
-bool pattach_malloc_t(pid_t pid, process_data **data) {
+bool pattach_malloc_t(pid_t pid) {
 	_tmalloc(true);
-	*data = pattach(pid);
+	process_data *data = pattach(pid);
 	_tmalloc(false);
 
 	return data == NULL;
