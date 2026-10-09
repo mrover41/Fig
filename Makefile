@@ -15,10 +15,11 @@ MOD_LDFLAGS = -ldl -rdynamic
 
 BIN_NAME ?= loader.bin
 APP_SRCS += $(wildcard src/main/*.c)
-APP_SRCS += $(wildcard src/uflags/*.c)
+APP_SRCS += $(wildcard src/tests/utests/*.c)
+APP_SRCS += $(wildcard src/tests/uflags/*.c)
 
 ifneq ($(UTESTS),)
-APP_SRCS += $(wildcard src/utests/*.c)
+APP_SRCS += $(wildcard src/tests/uwarps/*.c)
 endif
 
 BUILD_DIR = builds
