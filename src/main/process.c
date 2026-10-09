@@ -8,7 +8,6 @@
 #include <types/pdata.h>
 #include <api/process.h>
 #include <api/procinf.h>
-#include <utest/mflag.h> //example
 
 #include "processinf.h"
 
@@ -25,9 +24,7 @@ process_data *pattach(pid_t pid) {
 	}
 
 	if (data_arr == NULL) {
-		_tmalloc(true); //example
 		if ((data_arr = malloc(sizeof(process_info))) == NULL) {
-			_tmalloc(false); //example
 			fputs("Memory allocation error\n", stderr);
 
 			ptrace(PTRACE_DETACH, pid);
