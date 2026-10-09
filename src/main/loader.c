@@ -22,8 +22,11 @@ int main(int argc, char *argv[]) { //TODO: Write loader
 
 	puts("\t[-] TESTS BEGIN [-]\n");
 
-	if (pattach_t(pid)) puts("\tTEST: Pattach_t done\n");
-	if (pattach_malloc_t(pid)) puts("\tTEST: Pattach_malloc_t done\n"); //TODO: fix logging in this test
+	/*if (pattach_t(pid)) puts("\tTEST: Pattach_t done\n\n");
+	else puts("\tTEST: Pttach_t filed\n\n");*/
+
+	if (pattach_malloc_t(pid)) puts("\tTEST: Pattach_malloc_t done\n\n"); //TODO: fix logging in this test
+	else puts("\tTEST: Pttach_malloc_t filed\n\n");
 
 	puts("\t[-] TESTS END [-]\n");
 
