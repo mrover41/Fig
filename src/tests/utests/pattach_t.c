@@ -8,8 +8,8 @@
 
 static const bool mask[] = {true};
 
-bool pattach_t(pid_t pid) {
-	process_data *data = pattach(pid);
+bool pattach_t(pid_t pid, process_data **data) {
+	*data = pattach(pid);
 	return data != NULL;
 }
 
