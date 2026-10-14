@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) { //TODO: Write loader
 
 	puts("\t[-] TESTS BEGIN [-]\n");
 
-	/*if (pattach_t(pid, &data)) puts("\tTEST: Pattach_t done\n\n");
+	/*if (pattach_t()) puts("\tTEST: Pattach_t done\n\n");
 	else puts("\tTEST: Pttach_t filed\n\n");*/
 
 	if (pattach_malloc_t(pid)) puts("\tTEST: Pattach_malloc_t done\n\n"); //TODO: fix logging in this test
