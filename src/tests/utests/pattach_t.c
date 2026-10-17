@@ -8,8 +8,8 @@
 
 #include <utest/pattach_t.h>
 #include <utest/mflag.h>
+
 #include <types/pdata.h>
-#include <api/process.h>
 #include <api/process.h>
 
 static const bool mask[] = {true};
@@ -28,6 +28,8 @@ bool pattach_t() {
 
 	kill(child, SIGKILL);
 	waitpid(child, NULL, 0);
+
+	pdetach(data);
 	return data != NULL;
 }
 

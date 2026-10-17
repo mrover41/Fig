@@ -1,7 +1,6 @@
-#ifndef PALLOCT_H
-#define PALLOCT_H
+#ifndef PATTACH_H
+#define PATTACH_H
 
-#include <types/pdata.h>
 #include <sys/types.h>
 
 bool pattach_t();
