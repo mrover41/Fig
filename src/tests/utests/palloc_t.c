@@ -17,8 +17,6 @@ bool palloc_t() {
 		exit(0);
 	}
 
-	sleep(1);
-	
 	process_data *data = pattach(child);
 	if (data == NULL) {
 		puts("\t [PALLOC_T] ERROR IN TEST: pattach() filed\n");

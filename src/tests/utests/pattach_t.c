@@ -22,8 +22,6 @@ bool pattach_t() {
 		exit(0);
 	}
 
-	sleep(1);
-
 	process_data *data = pattach(child);
 
 	kill(child, SIGKILL);
