@@ -26,7 +26,7 @@ bool palloc(process_data *data) {
 #endif
 
 	char opcode[] = {0x0F, 0x05}; //syscall
-	if ((addr = pfind(opcode, sizeof(opcode) / sizeof(opcode[0]), data)) == NULL) { //TODO: Убрать это нахуй ибо оно не работает
+	if ((addr = pfind(opcode, sizeof(opcode) / sizeof(opcode[0]), data)) == NULL) {
 		fputs("[PAYLOAD_H] find syscall instruction error\n", stderr);
 		return false;
 	}
