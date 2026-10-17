@@ -95,26 +95,29 @@ void *pfind(const char *buff, size_t buff_size, process_data *dat) { //TODO: fin
 	remote_iov[0].iov_len = bsize;
 
 	ssize_t nread = process_vm_readv(dat->pid, local_iov, 1, remote_iov, 1, 0);
+	if (nread < 0) {
+		fputs("[PFIND] Err: nread < 0\n", stderr);
+        free(membuff);
+        return NULL;
+    }
 
-	size_t res = 0;
-	
 	if (bsize < buff_size) {
 		free(membuff);
-		fputs("[PFIND] Err: bsize >= buff_size", stderr);
+		fputs("[PFIND] Err: bsize >= buff_size\n", stderr);
 		return NULL;
 	}
 
-	void *found_addr = NULL;
+	void *res = NULL;
 
-    for (size_t i = 0; i <= bsize - buff_size; i++) {
+    for (size_t i = 0; i <= (size_t)nread - buff_size; i++) {
         if (memcmp(membuff + i, buff, buff_size) == 0) {
-            found_addr = (void *)(dat->base + i);
+            res = (void *)(dat->base + i);
             break;
         }
     }
 	
 #ifdef DEBUG
-	fprintf(stdout, "Instruction found, adress: %li\n", res);
+	fprintf(stdout, "Instruction found, adress: %p\n", res);
 #endif
 
 	free(membuff);
