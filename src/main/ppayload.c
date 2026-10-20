@@ -68,7 +68,7 @@ bool palloc(process_data *data) {
 	return true;
 }
 
-bool pexecute(void (*method)(), process_data *data) {
+/*bool pexecute(void (*method)(), process_data *data) {
 	process_info *pinf = NULL;
 	if ((pinf = get_pparent(data)) == NULL) return false;
 	if (pinf->allocAddr == NULL) return false;
@@ -89,9 +89,9 @@ bool pexecute(void (*method)(), process_data *data) {
 	//TODO: run injected code in remote process
 
 	return true;
-}
+}*/
 
-void *pfind(const char *buff, size_t buff_size, process_data *dat) { //TODO: find bytecode instruction
+void *pfind(const char *buff, size_t buff_size, process_data *dat) { //TODO: test and fix find bytecode instruction
 	size_t bsize = dat->base_end - dat->base;
 	char *membuff = malloc(bsize);
 
