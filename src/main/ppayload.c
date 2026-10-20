@@ -70,7 +70,6 @@ bool palloc(process_data *data) {
 bool pexecute(void (*method)(), process_data *data) {
 	process_info *pinf = NULL;
 	if ((pinf = get_pparent(data)) == NULL) return false;
-
 	if (pinf->allocAddr == NULL) return false;
 	
 	//TODO: Inject code (target process must execute method [in own adress spece and use own stack])
@@ -83,7 +82,7 @@ void *pfind(const char *buff, size_t buff_size, process_data *dat) { //TODO: fin
 	char *membuff = malloc(bsize);
 
 #ifdef DEBUG
-	fprintf(stdout, "Try to find instruction, memory buffer size: %li\nBuffer size: %li\n\n", bsize, buff_size);
+	fprintf(stdout, "Try to find instruction\nLocal memory buffer size: %li\nInstruction buffer size: %li\nProcess PID: %i\n\n", bsize, buff_size, dat->pid);
 #endif
 
 	struct iovec local_iov[1];
@@ -96,14 +95,15 @@ void *pfind(const char *buff, size_t buff_size, process_data *dat) { //TODO: fin
 
 	ssize_t nread = process_vm_readv(dat->pid, local_iov, 1, remote_iov, 1, 0);
 	if (nread < 0) {
-		fputs("[PFIND] Err: nread < 0\n", stderr);
+		perror("process_vm_readv failed");
+		fprintf(stderr, "[PFIND] Err: nread < 0\nnread = %li\n", nread);
         free(membuff);
         return NULL;
     }
 
 	if (bsize < buff_size) {
 		free(membuff);
-		fputs("[PFIND] Err: bsize >= buff_size\n", stderr);
+		fputs("[PFIND] Err: bsize < buff_size\n", stderr);
 		return NULL;
 	}
 
