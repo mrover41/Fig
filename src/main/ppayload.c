@@ -17,6 +17,7 @@
 
 
 void *pfind(const char *, size_t, process_data *);
+ssize_t get_msize(void *);
 
 bool palloc(process_data *data) {
 	void *addr = NULL;
@@ -49,8 +50,8 @@ bool palloc(process_data *data) {
 	regs.rax = 0x09;
 	regs.rdi = 0;
 	regs.rsi = 4096;
-	regs.rdx = 0x1 | 0x2 | 0x4;
-	regs.r10 = 0x02 | 0x20;
+	regs.rdx = 0x1 | 0x2 | 0x4; //READ|WRITE|EXEC
+	regs.r10 = 0x02 | 0x20; //PRIVATE|ANONYMOUS
 	regs.r8  = (unsigned long long)-1;
 	regs.r9  = 0;
 
@@ -72,7 +73,20 @@ bool pexecute(void (*method)(), process_data *data) {
 	if ((pinf = get_pparent(data)) == NULL) return false;
 	if (pinf->allocAddr == NULL) return false;
 	
-	//TODO: Inject code (target process must execute method [in own adress spece and use own stack])
+	ssize_t msize;
+	if ((msize = get_msize(method)) < 0) return false;
+
+	struct iovec local_iov[1];
+	local_iov[0].iov_base = method;
+	local_iov[0].iov_len = msize;
+
+	struct iovec remote_iov[1];
+	remote_iov[0].iov_base = pinf->allocAddr;
+	remote_iov[0].iov_len = msize;
+
+	if (process_vm_writev(data->pid, local_iov, 1, remote_iov, 1, 0) != msize) return false;
+
+	//TODO: run injected code in remote process
 
 	return true;
 }
@@ -122,4 +136,12 @@ void *pfind(const char *buff, size_t buff_size, process_data *dat) { //TODO: fin
 
 	free(membuff);
 	return (void *)res;
+}
+
+ssize_t get_msize(void *method) {
+	size_t indx = 0;
+	while (((unsigned char*)method)[indx] != 0xC3) {
+		indx++;
+	}
+	return indx;
 }
