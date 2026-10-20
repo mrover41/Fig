@@ -23,7 +23,9 @@ bool palloc_t() {
 		return false;
 	}
 
+	bool res = palloc(data);
+
 	kill(child, SIGKILL);
 	waitpid(child, NULL, 0);
-	return palloc(data);
+	return res;
 }
