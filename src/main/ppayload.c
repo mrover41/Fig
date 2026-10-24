@@ -87,6 +87,7 @@ bool palloc(process_data *data) {
 	if (process_vm_writev(data->pid, local_iov, 1, remote_iov, 1, 0) != msize) return false;
 
 	//TODO: run injected code in remote process
+	//TODO: or just delete this and use also method (preority this)
 
 	return true;
 }*/
