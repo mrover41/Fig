@@ -22,6 +22,7 @@ int main(int argc, char *argv[]) { //TODO: Write loader
 
 	if ((pid = atoi(argv[1])) == 0) return -1;
 
+#ifdef DEBUG
 	puts("\t[-] TESTS BEGIN [-]\n");
 
 	if (pattach_t()) puts("\t\033[32mTEST: Pattach_t done\033[0m\n");
@@ -34,6 +35,8 @@ int main(int argc, char *argv[]) { //TODO: Write loader
 	else puts("\t\033[31mTEST: Palloc_t filed\033[0m\n");
 
 	puts("\t[-] TESTS END [-]\n");
+
+#endif
 
 	//TODr: Load libs	
 

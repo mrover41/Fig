@@ -1,4 +1,4 @@
-CC = gcc
+CC = clang
 
 ifeq ($(DEBUG), 1)
 	CFLAGS += -g -DDEBUG -fsanitize=address -fsanitize=leak
@@ -8,7 +8,7 @@ UTESTS ?=
 comma := ,
 WRAP_FLAGS = $(foreach t,$(subst $(comma), ,$(UTESTS)),-Wl,--wrap,$(t))
 
-CFLAGS += -Wall -Wextra -O2 -I/usr/local/include -I./include -I./comm
+CFLAGS += -Wall -Wextra -O2 -I/usr/local/include -I./include -I./comm -include stdbool.h
 
 MAIN_LDFLAGS = -L/usr/local/lib -ldl -lpthread -lcurl -lssl -lcrypto -rdynamic
 MOD_LDFLAGS = -ldl -rdynamic
@@ -44,7 +44,7 @@ $(BUILD_DIR) $(MOD_DIR):
 
 $(BIN_NAME): $(APP_SRCS)
 	@mkdir -p $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(APP_SRCS) $(WRAP_FLAGS) -o $(BUILD_DIR)/$@ -L/usr/local/lib -Wl,--whole-archive -ldiscord -Wl,--no-whole-archive -ldl -lpthread -lcurl -lssl -lcrypto -rdynamic -lm
+	$(CC) $(CFLAGS) $(APP_SRCS) $(WRAP_FLAGS) -o $(BUILD_DIR)/$@ -L/usr/local/lib -Wl,--whole-archive -Wl,--no-whole-archive -ldl -lpthread -lssl -lcrypto -rdynamic -lm
 
 $(MOD_DIR)/%.so: ./src/mod_dev/%
 	@mkdir -p $(MOD_DIR)
